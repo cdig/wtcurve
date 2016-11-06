@@ -1,6 +1,6 @@
 (function() {
   window.addEventListener("DOMContentLoaded", function() {
-    var TAU, bounds, canvas, context, dist, dragNode, evalCurve, field, getNodeAtScreenPoint, getNodeIndex, height, inset, mouse, mouseToPos, mouseToScreen, nodeRadius, nodes, pointsDirty, posToScreen, range, render, renderNode, screenToPos, width;
+    var TAU, approx, bounds, canvas, context, dist, dragNode, evalCurve, evalCurveHistory, field, getNodeAtScreenPoint, getNodeIndex, height, inset, mouse, mouseToPos, mouseToScreen, nodeRadius, nodes, pointsDirty, posToScreen, range, render, renderNode, screenToPos, width;
     field = document.querySelector("[field]");
     canvas = document.querySelector("canvas");
     context = canvas.getContext("2d");
@@ -66,6 +66,28 @@
       return Math.sqrt(dx * dx + dy * dy);
     };
     evalCurve = function(t) {
+      var a, b, dx, dy, i, j, len, nextPoints, p, points;
+      points = nodes;
+      while (points.length > 1) {
+        nextPoints = [];
+        for (i = j = 0, len = points.length; j < len; i = ++j) {
+          a = points[i];
+          if (!(i < points.length - 1)) {
+            continue;
+          }
+          b = points[i + 1];
+          dx = b.x - a.x;
+          dy = b.y - a.y;
+          nextPoints.push(p = {
+            x: a.x + dx * t,
+            y: a.y + dy * t
+          });
+        }
+        points = nextPoints;
+      }
+      return points[0];
+    };
+    evalCurveHistory = function(t) {
       var a, b, dx, dy, history, i, j, len, nextPoints, p, points;
       history = [nodes];
       points = nodes;
@@ -88,11 +110,31 @@
       }
       return history;
     };
+    approx = function(goal) {
+      var a, attempts, b, mid, v;
+      a = 0;
+      b = 1;
+      attempts = 0;
+      v = null;
+      while (attempts < 20) {
+        mid = (a + b) / 2;
+        v = evalCurve(mid);
+        if (Math.abs(v.x - goal) < 0.0001) {
+          return v.y;
+        } else if (v.x > goal) {
+          b = mid;
+        } else {
+          a = mid;
+        }
+        attempts++;
+      }
+      return v.y;
+    };
     renderNode = function(n) {
       return "[" + Math.round(n.x * 100) / 100 + "," + Math.round(n.y * 100) / 100 + "]";
     };
     render = function() {
-      var g, h, history, hoverNode, i, inc, j, k, l, len, len1, len2, m, node, p, point, points, results, t;
+      var g, h, history, hoverNode, i, inc, j, k, l, len, len1, len2, mp, ms, node, p, point, points, results, t, x, y;
       if (pointsDirty) {
         field.innerHTML = "[" + nodes.map(renderNode).join(", ") + "]";
         pointsDirty = false;
@@ -103,8 +145,9 @@
       context.rect(0, inset, width, range);
       context.fill();
       if (mouse != null) {
-        m = mouseToPos(mouse);
-        history = evalCurve(m.x);
+        mp = mouseToPos(mouse);
+        ms = mouseToScreen(mouse);
+        history = evalCurveHistory(mp.x);
         for (h = j = 0, len = history.length; j < len; h = ++j) {
           points = history[h];
           context.beginPath();
@@ -117,9 +160,9 @@
               y: point.y
             });
             if (points.length === 1) {
-              context.arc(p.x, p.y, 3, 0, TAU);
-              context.fillStyle = "#008";
-              context.fill();
+              context.arc(p.x, p.y, 5, 0, TAU);
+              context.strokeStyle = "#555";
+              context.stroke();
             } else if (i === 0) {
               context.moveTo(p.x, p.y);
             } else {
@@ -128,6 +171,15 @@
           }
           context.stroke();
         }
+        x = ms.x;
+        y = posToScreen({
+          x: 0,
+          y: approx(mp.x)
+        }).y;
+        context.beginPath();
+        context.fillStyle = "#080";
+        context.arc(x, y, 5, 0, TAU);
+        context.fill();
       }
       context.beginPath();
       context.strokeStyle = "#F00";
@@ -135,8 +187,7 @@
       inc = 0.01;
       t = 0;
       while (t <= 1) {
-        history = evalCurve(t);
-        point = history[history.length - 1][0];
+        point = evalCurve(t);
         p = posToScreen({
           x: point.x,
           y: point.y
