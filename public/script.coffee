@@ -1,151 +1,160 @@
-_history = []
-_historySize = 300
-_updateClosure = null
-_cm = null
-@_min = 0
-@_max = 0
-@log = (x)-> console.log x; return x
+field = document.querySelector "[field]"
+canvas = document.querySelector "canvas"
+context = canvas.getContext "2d"
+width = canvas.width = parseInt canvas.offsetWidth
+height = canvas.height = width
+bounds = canvas.getBoundingClientRect()
+range = height * .7
+inset = (height-range)/2
+TAU = Math.PI*2
+nodeRadius = 15
+nodes = []
+dragNode = null
+mouse = null
+pointsDirty = true
 
-TAU = Math.PI * 2
-# @x = 0
+posToScreen = ({x:x, y:y})->
+  x: width * x
+  y: height - inset - y * range
 
-examples =
-  sin: "frequency = 1 # Cycles per second\nMath.sin(time * frequency * TAU)"
-  saw: "time % 1\n# The '1' isn't cycles-per-second — what is it?\n# When you change the mod, what happens to the max? Why?\n# What can you do to adjust the mod while keeping the output range between 0 and 1?"
-  square: "Math.round(time % 1)\n# The '1' isn't cycles-per-second OR seconds-per-cycle — what is it?\n# When you change the mod, what happens to the rhythm?\n# What can you do to make a more uniform rhythm?"
-  triangle: "Math.abs((time % 1 * 2) - 1)\n# This one is more complex. There's a simpler version with half the frequency:\n# Math.abs((time % 2) - 1)"
-  silly: "c = Math.cos(time)\np = Math.pow(c, 3)\nMath.sin(p * TAU)\n# Playing with simple trig and pow can produce some fun results\n# What happens if you make the '3' a negative, or a decimal?\n# Watch the 'value' in the chart below"
-  chaotic: "# Emergent complexity, much?\nc = Math.cos(time)\np = Math.pow(c, Math.round(2 * time % 3))\nMath.sin(p * TAU)"
-  state: "# To put a variable on the window, use the @ sign\n# You should initialize your variables with ?= to avoid null/NaN issues\n@x ?= 0\nif (@x < 0.01)\n\t@x = 1\nelse\n\t@x *= 0.9\n@x"
-  random: "Math.random() # Yes, you can access standard functions"
-  dT: "dT # Try this in different browsers"
-  log: "log(dT) # This is a special pass-through logging function — check your browser inspector!"
+screenToPos = ({x:x, y:y})->
+  x: Math.min 1, Math.max 0, x / width
+  y: Math.min 1.2, Math.max -0.2, (height - inset - y) / range
 
+mouseToScreen = (e)->
+  x: e.clientX - bounds.left
+  y: e.clientY - bounds.top
 
-scale = (input, inputMin, inputMax, outputMin, outputMax)->
-  if inputMax is inputMin
-    outputMin
-  else
-    input -= inputMin
-    input /= inputMax - inputMin
-    input *= outputMax - outputMin
-    input += outputMin
-    input
+mouseToPos = (e)->
+  screenToPos mouseToScreen e
 
-compileSource = (editor)->
-  source = editor.getValue()
-  @localStorage["source"] = source
-  console.clear()
-  results = $('#repl_results')
-  @compiledJS = ''
-  try
-    @compiledJS = CoffeeScript.compile source, bare: on
-    results.text("")
-  catch {location, message}
-    if location?
-      message = "Error on line #{location.first_line + 1}: #{message}"
-    results.text(message).addClass 'error'
+getNodeIndex = (node)->
+  return i for n, i in nodes when n is node
 
+getNodeAtScreenPoint = (p)->
+  for node, i in nodes
+    return node if dist(posToScreen(node), p) <= nodeRadius
+  return null
 
-ready ()->
-  canvas = document.querySelector "canvas"
-  context = canvas.getContext "2d"
+dist = (a, b)->
+  dx = a.x-b.x
+  dy = a.y-b.y
+  Math.sqrt dx*dx + dy*dy
+
+evalCurve = (t)->
+  history = [nodes]
+  points = nodes
+  while points.length > 1
+    history.push nextPoints = []
+    for a, i in points when i < points.length-1
+      b = points[i+1]
+      dx = b.x-a.x
+      dy = b.y-a.y
+      nextPoints.push p =
+        x: a.x + dx*t
+        y: a.y + dy*t
+    points = nextPoints
+  return history
+
+renderNode = (n)->
+  "[" + Math.round(n.x*100)/100 + "," + Math.round(n.y*100)/100 + "]"
+
+render = ()->
+  if pointsDirty
+    field.innerHTML = "[" + nodes.map(renderNode).join(", ") + "]"
+    pointsDirty = false
   
-  # Configure CM
-  CodeMirror.defaults.lineNumbers = true
-  CodeMirror.defaults.tabSize = 2
-  CodeMirror.defaults.historyEventDelay = 200
-  CodeMirror.defaults.viewportMargin = Infinity
-  CodeMirror.defaults.extraKeys =
-    Tab: false
-    "Shift-Tab": false
-    "Cmd-Enter": ()->
-      render(true)
-  _cm = CodeMirror.fromTextArea $("textarea")[0], mode: 'coffeescript'
-  _cm.on "changes", (editor, change)->
-    compileSource(editor)
-  
-  $("button[wtf-type]").click (e)->
-    _history = []
-    _cm.setValue(examples[$(e.target).attr("wtf-type")])
-    compileSource(_cm)
-  
-  if @localStorage["source"]?
-    _cm.setValue(@localStorage["source"])
-  else
-    _cm.setValue(examples.sin)
-  compileSource(_cm)
-  
-  _updateClosure = (t)-> update(canvas, t)
-  firstTick = (t)->
-    @time = t/1000
-    requestAnimationFrame _updateClosure
-  requestAnimationFrame firstTick
-
-
-
-
-update = (canvas, t)->
-  
-  @dT = t/1000 - @time
-  @time = t/1000
-  
-  try
-    @value = eval @compiledJS
-    if @value?
-      _history.unshift @value
-      _history.pop() if _history.length > _historySize
-    
-      render(canvas)
-      
-      for c in $("table tr [wtf-chart]")
-        e = $(c)
-        n = e.attr("wtf-chart")
-        v = @[n]
-        v = @["_#{n}"] unless v?
-        e.text Math.round(v * 1000)/1000
-  
-  requestAnimationFrame _updateClosure
-
-
-
-
-render = (canvas)->
-  return unless _history.length > 0
-  
-  context = canvas.getContext "2d"
-  
-  # Just do everything at 2x so that we're good for most retina displays (hard to detect)
-  width = canvas.width = parseInt(canvas.offsetWidth)
-  height = canvas.height = parseInt(canvas.offsetHeight)
-  
-  cx = width/2
-  cy = height/2
-  
-  @_min = Infinity
-  @_max = -Infinity
-  for v, i in _history
-    @_max = v if v > @_max
-    @_min = v if v < @_min
-
+  # nodes.sort (a, b)-> a.x - b.x
+  context.clearRect 0,0,width,height
   
   context.beginPath()
-  context.strokeStyle = "#CCC"
-  y = scale(0, @_min, @_max, height, 0)
-  context.moveTo(0, y);
-  context.lineTo(width, y);
-  context.stroke()
+  context.fillStyle = "#FFF"
+  context.rect 0, inset, width, range
+  context.fill()
+
+  if mouse?
+    m = mouseToPos mouse
+    history = evalCurve m.x
+    for points, h in history
+      context.beginPath()
+      g = 220 - 140 * h/history.length
+      context.strokeStyle = "rgb(#{g},#{g},#{g})"
+      for point, i in points
+        p = posToScreen x:point.x, y: point.y
+        if points.length is 1
+          context.arc p.x, p.y, 3, 0, TAU
+          context.fillStyle = "#008"
+          context.fill()
+        else if i is 0
+          context.moveTo p.x, p.y
+        else
+          context.lineTo p.x, p.y
+      context.stroke()
 
   context.beginPath()
-  context.lineWidth = 2
-  context.strokeStyle = "black"
-  for v, i in _history
-    x = i/(_historySize-1) * width
-    y = scale(v, @_min, @_max, height, 0)
-    if i == 0
-      context.arc(x, y, 6, 0, TAU)
-      context.fill()
-      context.moveTo(x, y);
+  context.strokeStyle = "#F00"
+  context.lineWidth = 3
+  inc = 0.01
+  t = 0
+  while t <= 1
+    history = evalCurve t
+    point = history[history.length-1][0]
+    p = posToScreen x:point.x, y:point.y
+    if t is 0
+      context.moveTo p.x, p.y
     else
-      context.lineTo(x, y);
+      context.lineTo p.x, p.y
+    t += inc
   context.stroke()
+  context.lineWidth = 1
+  
+  if mouse?
+    hoverNode = getNodeAtScreenPoint mouseToScreen mouse
+  
+  for node in nodes
+    context.beginPath()
+    p = posToScreen node
+    context.arc p.x, p.y, nodeRadius, 0, TAU
+    context.fillStyle = if node is dragNode then "#F80" else if node is hoverNode then "#FD7" else "#AAA"
+    context.fill()
+
+        
+
+canvas.addEventListener "mousedown", (e)->
+  dragNode = getNodeAtScreenPoint mouseToScreen e
+  render()
+
+window.addEventListener "mousemove", (e)->
+  mouse = e
+  if dragNode
+    p = mouseToPos e
+    i = getNodeIndex dragNode
+    p.x = 0 if i is 0
+    p.x = 1 if i is nodes.length-1
+    p.y = 0 if Math.abs(p.y) < 0.015
+    p.y = 1 if Math.abs(p.y - 1) < 0.015
+    dragNode.x = p.x
+    dragNode.y = p.y
+    pointsDirty = true
+  render()
+
+window.addEventListener "mouseup", (e)->
+  dragNode = null
+  render()
+
+canvas.addEventListener "dblclick", (e)->
+  if node = getNodeAtScreenPoint mouseToScreen e
+    i = getNodeIndex node
+    nodes.splice i, 1 if i isnt 0 and i isnt nodes.length-1
+  else
+    p = mouseToPos e
+    for n, i in nodes
+      if n.x >= p.x
+        nodes.splice i, 0, p
+        break
+  pointsDirty = true
+  render()
+  
+nodes.push x:0, y:0
+nodes.push x:1, y:1
+render()

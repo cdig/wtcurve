@@ -1,78 +1,27 @@
 <!doctype html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="format-detection" content="telephone=no">
-<link rel="apple-touch-icon" sizes="120x120" href="/assets/apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="152x152" href="/assets/apple-touch-icon-152x152.png">
-<link rel="apple-touch-icon" sizes="167x167" href="/assets/apple-touch-icon-167x167.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon-180x180.png">
-<link rel="icon" href="/assets/favicon-16x16.png" sizes="16x16">
-<link rel="icon" href="/assets/favicon-48x48.png" sizes="48x48">
-<link rel="icon" href="/assets/favicon-64x64.png" sizes="64x64">
-<link rel="icon" href="/assets/favicon-192x192.png" sizes="192x192">
-<link rel="icon" href="/assets/favicon-32x32.png" sizes="32x32"><!-- Must come last -->
-<link rel="stylesheet" href="/styles.css">
-<script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
-<script>
-window.ready = function(fn) {
-  if (document.readyState == "loading") {
-    document.addEventListener("DOMContentLoaded", fn);
-  } else {
-    fn();
-  }
-  return fn; // pass-through
-}
-</script>
-
-<script src="codemirror.js"></script>
-<link rel="stylesheet" href="codemirror.css">
-<script src="codemirror-coffeescript.js"></script>
-
-<script defer src="/coffeescript.js"></script>
-<script defer src="/scripts.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/style.css">
 </head>
-
 <body>
-  <h1>WTFunction</h1>
-  <p>Examples:
-  <button wtf-type="sin">Sin Wave</button>
-  <button wtf-type="saw">Sawtooth Wave</button>
-  <button wtf-type="square">Square Wave</button>
-  <button wtf-type="triangle">Triangle Wave</button>
-  <button wtf-type="silly">Silly Wave</button>
-  <button wtf-type="chaotic">Chaos Wave</button>
-  <button wtf-type="state">Saving State</button>
-  <button wtf-type="random">Random</button>
-  <button wtf-type="dT">dT</button>
-  <button wtf-type="log">log</button>
-  </p>
-
-  <canvas></canvas>
-
-  <textarea id="repl_source" rows="100" spellcheck="false"></textarea>
-  <pre id="repl_results"></pre>
-
-  <table>
-    <tr><td>dT</td><td wtf-chart="dT"></td></tr>
-    <tr><td>time</td><td wtf-chart="time"></td></tr>
-    <tr><td>value</td><td wtf-chart="value"></td></tr>
-    <tr><td>max</td><td wtf-chart="max"></td></tr>
-    <tr><td>min</td><td wtf-chart="min"></td></tr>
-  </table>
-
-  <p>You can write (almost) any valid CoffeeScript in the text area. You have access to global variables for <em>time</em> and <em>dT</em>, as well as a global constant <em>TAU</em>. Every frame, we will execute the code. The last line of your code should be a numeric value. The graph will draw that value over time. We will re-scale the graph on the fly, and show the current range of the graph as <em>max</em> and <em>min</em> in the chart above. If you want to store a variable from one frame to the next, please attach it to window (see the "Saving State" example). Undo/Redo keyboard shortcuts work when you have keyboard focus on the text area.</p>
-
-  <footer>
-    <p>
-      This trash-REPL is a tire fire by <a href="https://twitter.com/spiralganglion">what's-his-face</a>.
-      WTFork this on HugBit: <a href="http://github.com/cdig/wtfunction">http://github.com/cdig/wtfunction</a>.
-    </p>
-    <img src="comic.png">
-    <p>
-      I couldn't agree more, Kligore.
-    </p>
-  </footer>
+  <h1>WTCurve</h1>
+  <div class="row">
+    <canvas></canvas>
+    <div class="right">
+      <p>
+        Double click to add points. Double click a point to kill it. Drag points.
+        Boom. You've created a bezier curve. It looks lovely.
+        Use the points data wherever you need an arbitrarily complex bezier.
+      </p>
+      <p></p>
+      <p><i>Note to self: link to my handy animation library that takes points and uses them for arbitrarily complex bezier easing.</i></p>
+      <h4>Points:</h4>
+      <p type="text" field></p>
+    </div>
+  </div>
+  <p>This.. thing.. is a tire fire by <a href="https://twitter.com/spiralganglion">what's-his-face</a>. WTFork this on BitGuh: <a href="http://github.com/cdig/wtcurve">http://github.com/cdig/wtcurve</a>.</p>
+  <script defer src="/script.js"></script>
 </body>
 </html>
