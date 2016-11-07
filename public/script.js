@@ -1,6 +1,6 @@
 (function() {
   window.addEventListener("DOMContentLoaded", function() {
-    var TAU, approx, bounds, canvas, context, dist, dragNode, evalCurve, evalCurveHistory, field, getNodeAtScreenPoint, getNodeIndex, height, inset, mouse, mouseToPos, mouseToScreen, nodeRadius, nodes, pointsDirty, posToScreen, range, render, renderNode, screenToPos, width;
+    var TAU, approx, bounds, canvas, context, dist, dragNode, evalCurve, evalCurveHistory, field, focusing, getNodeAtScreenPoint, getNodeIndex, height, init, inset, mouse, mouseToPos, mouseToScreen, nodeRadius, nodes, pointsDirty, posToScreen, range, readField, render, renderNode, screenToPos, width;
     field = document.querySelector("[field]");
     canvas = document.querySelector("canvas");
     context = canvas.getContext("2d");
@@ -15,6 +15,19 @@
     dragNode = null;
     mouse = null;
     pointsDirty = true;
+    focusing = false;
+    init = function() {
+      nodes = [];
+      nodes.push({
+        x: 0,
+        y: 0
+      });
+      nodes.push({
+        x: 1,
+        y: 1
+      });
+      return render();
+    };
     posToScreen = function(arg) {
       var x, y;
       x = arg.x, y = arg.y;
@@ -130,12 +143,40 @@
       }
       return v.y;
     };
+    readField = function() {
+      var arr, p;
+      try {
+        if (field.innerText.length < 2) {
+          return init();
+        }
+        arr = JSON.parse(field.innerText);
+        if (arr.length < 2) {
+          return init();
+        }
+        nodes = (function() {
+          var j, len, results;
+          results = [];
+          for (j = 0, len = arr.length; j < len; j++) {
+            p = arr[j];
+            results.push({
+              x: p[0],
+              y: p[1]
+            });
+          }
+          return results;
+        })();
+        nodes[0].x = 0;
+        nodes[nodes.length - 1].x = 1;
+        pointsDirty = true;
+        return render();
+      } catch (error) {}
+    };
     renderNode = function(n) {
       return "[" + Math.round(n.x * 100) / 100 + "," + Math.round(n.y * 100) / 100 + "]";
     };
     render = function() {
       var g, h, history, hoverNode, i, inc, j, k, l, len, len1, len2, mp, ms, node, p, point, points, results, t, x, y;
-      if (pointsDirty) {
+      if (pointsDirty && !focusing) {
         field.innerHTML = "[" + nodes.map(renderNode).join(", ") + "]";
         pointsDirty = false;
       }
@@ -267,15 +308,14 @@
       pointsDirty = true;
       return render();
     });
-    nodes.push({
-      x: 0,
-      y: 0
+    field.addEventListener("keyup", readField);
+    field.addEventListener("focus", function() {
+      return focusing = true;
     });
-    nodes.push({
-      x: 1,
-      y: 1
+    field.addEventListener("blur", function() {
+      return readField(focusing = false);
     });
-    return render();
+    return init();
   });
 
 }).call(this);

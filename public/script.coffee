@@ -14,7 +14,14 @@ window.addEventListener "DOMContentLoaded", ()->
   dragNode = null
   mouse = null
   pointsDirty = true
-
+  focusing = false
+  
+  init = ()->
+    nodes = []
+    nodes.push x:0, y:0
+    nodes.push x:1, y:1
+    render()
+  
   posToScreen = ({x:x, y:y})->
     x: width * x
     y: height - inset - y * range
@@ -89,12 +96,23 @@ window.addEventListener "DOMContentLoaded", ()->
       attempts++
     return v.y
 
+  readField = ()->
+    try
+      return init() if field.innerText.length < 2
+      arr = JSON.parse field.innerText
+      return init() if arr.length < 2
+      nodes = ({ x: p[0], y: p[1] } for p in arr)
+      nodes[0].x = 0
+      nodes[nodes.length-1].x = 1
+      pointsDirty = true
+      render()
+      
   
   renderNode = (n)->
     "[" + Math.round(n.x*100)/100 + "," + Math.round(n.y*100)/100 + "]"
-
+  
   render = ()->
-    if pointsDirty
+    if pointsDirty and not focusing
       field.innerHTML = "[" + nodes.map(renderNode).join(", ") + "]"
       pointsDirty = false
     
@@ -196,7 +214,8 @@ window.addEventListener "DOMContentLoaded", ()->
           break
     pointsDirty = true
     render()
-    
-  nodes.push x:0, y:0
-  nodes.push x:1, y:1
-  render()
+  
+  field.addEventListener "keyup", readField
+  field.addEventListener "focus", ()-> focusing = true
+  field.addEventListener "blur", ()-> readField focusing = false
+  init()
