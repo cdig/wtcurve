@@ -10,7 +10,7 @@ window.addEventListener "DOMContentLoaded", ()->
   inset = (height-range)/2
   TAU = Math.PI*2
   nodeRadius = 15
-  nodes = []
+  nodes = null
   dragNode = null
   mouse = null
   pointsDirty = true
@@ -21,6 +21,9 @@ window.addEventListener "DOMContentLoaded", ()->
     nodes.push x:0, y:0
     nodes.push x:1, y:1
     render()
+  
+  save = ()->
+    localStorage.setItem "wtcurve", JSON.stringify nodes
   
   posToScreen = ({x:x, y:y})->
     x: width * x
@@ -112,9 +115,11 @@ window.addEventListener "DOMContentLoaded", ()->
     "[" + Math.round(n.x*100)/100 + "," + Math.round(n.y*100)/100 + "]"
   
   render = ()->
-    if pointsDirty and not focusing
-      field.innerHTML = "[" + nodes.map(renderNode).join(", ") + "]"
+    if pointsDirty
       pointsDirty = false
+      save()
+      if not focusing
+        field.innerHTML = "[" + nodes.map(renderNode).join(", ") + "]"
     
     context.clearRect 0,0,width,height
     
@@ -218,4 +223,5 @@ window.addEventListener "DOMContentLoaded", ()->
   field.addEventListener "keyup", readField
   field.addEventListener "focus", ()-> focusing = true
   field.addEventListener "blur", ()-> readField focusing = false
-  init()
+  
+  (nodes = JSON.parse localStorage.getItem "wtcurve") or init()

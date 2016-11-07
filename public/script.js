@@ -1,6 +1,6 @@
 (function() {
   window.addEventListener("DOMContentLoaded", function() {
-    var TAU, approx, bounds, canvas, context, dist, dragNode, evalCurve, evalCurveHistory, field, focusing, getNodeAtScreenPoint, getNodeIndex, height, init, inset, mouse, mouseToPos, mouseToScreen, nodeRadius, nodes, pointsDirty, posToScreen, range, readField, render, renderNode, screenToPos, width;
+    var TAU, approx, bounds, canvas, context, dist, dragNode, evalCurve, evalCurveHistory, field, focusing, getNodeAtScreenPoint, getNodeIndex, height, init, inset, mouse, mouseToPos, mouseToScreen, nodeRadius, nodes, pointsDirty, posToScreen, range, readField, render, renderNode, save, screenToPos, width;
     field = document.querySelector("[field]");
     canvas = document.querySelector("canvas");
     context = canvas.getContext("2d");
@@ -11,7 +11,7 @@
     inset = (height - range) / 2;
     TAU = Math.PI * 2;
     nodeRadius = 15;
-    nodes = [];
+    nodes = null;
     dragNode = null;
     mouse = null;
     pointsDirty = true;
@@ -27,6 +27,9 @@
         y: 1
       });
       return render();
+    };
+    save = function() {
+      return localStorage.setItem("wtcurve", JSON.stringify(nodes));
     };
     posToScreen = function(arg) {
       var x, y;
@@ -176,9 +179,12 @@
     };
     render = function() {
       var g, h, history, hoverNode, i, inc, j, k, l, len, len1, len2, mp, ms, node, p, point, points, results, t, x, y;
-      if (pointsDirty && !focusing) {
-        field.innerHTML = "[" + nodes.map(renderNode).join(", ") + "]";
+      if (pointsDirty) {
         pointsDirty = false;
+        save();
+        if (!focusing) {
+          field.innerHTML = "[" + nodes.map(renderNode).join(", ") + "]";
+        }
       }
       context.clearRect(0, 0, width, height);
       context.beginPath();
@@ -315,7 +321,7 @@
     field.addEventListener("blur", function() {
       return readField(focusing = false);
     });
-    return init();
+    return (nodes = JSON.parse(localStorage.getItem("wtcurve"))) || init();
   });
 
 }).call(this);
