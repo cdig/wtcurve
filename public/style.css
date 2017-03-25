@@ -15,6 +15,11 @@ body {
   padding: 1em 2em;
   font-family: "Comic Sans MS";
   text-align: center;
+  
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .row {
@@ -30,13 +35,6 @@ body {
   text-align: left;
 }
 
-.unselectable {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
 canvas {
   display: inline-block;
   width: 40em;
@@ -47,4 +45,8 @@ canvas {
 }
 
 [field] {
+  -webkit-user-select: auto;
+  -moz-user-select: auto;
+  -ms-user-select: auto;
+  user-select: auto;
 }
