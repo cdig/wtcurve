@@ -12,7 +12,7 @@ html {
 }
 
 body {
-  padding: 1em 2em;
+  padding: 0 2em;
   font-family: "Comic Sans MS";
   text-align: center;
   
@@ -25,7 +25,7 @@ body {
 .row {
   display: flex;
   max-width: 60em;
-  margin: 0 auto 4em;
+  margin: 0 auto 3em;
   flex-flow: row wrap;
   justify-content: center;
 }

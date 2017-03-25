@@ -1,6 +1,6 @@
 (function() {
   window.addEventListener("DOMContentLoaded", function() {
-    var TAU, approx, canvas, context, dist, dragNode, evalCurve, evalCurveHistory, field, focusing, getNodeAtScreenPoint, getNodeIndex, height, init, inset, mouse, mouseToPos, mouseToScreen, nodeRadius, nodes, pointsDirty, posToScreen, range, readField, render, renderNode, save, screenToPos, width;
+    var TAU, approx, canvas, context, dist, dragNode, evalCurve, evalCurveHistory, field, focusing, getNodeAtScreenPoint, getNodeIndex, height, init, inset, mouse, mouseToPos, mouseToScreen, nodePad, nodeRadius, nodes, pointsDirty, posToScreen, range, readField, render, renderNode, save, screenToPos, width;
     field = document.querySelector("[field]");
     canvas = document.querySelector("canvas");
     context = canvas.getContext("2d");
@@ -9,7 +9,8 @@
     range = height * .7;
     inset = (height - range) / 2;
     TAU = Math.PI * 2;
-    nodeRadius = 15;
+    nodeRadius = 4;
+    nodePad = 10;
     nodes = null;
     dragNode = null;
     mouse = null;
@@ -69,7 +70,7 @@
       var i, j, len, node;
       for (i = j = 0, len = nodes.length; j < len; i = ++j) {
         node = nodes[i];
-        if (dist(posToScreen(node), p) <= nodeRadius) {
+        if (dist(posToScreen(node), p) <= nodeRadius + nodePad) {
           return node;
         }
       }
@@ -201,7 +202,7 @@
           y: approx(mp.x)
         }).y;
         context.beginPath();
-        context.fillStyle = "#888";
+        context.fillStyle = "#F00";
         context.arc(x, y, 5, 0, TAU);
         context.fill();
       } else {
@@ -225,8 +226,8 @@
             context.lineTo(p.x, p.y);
           }
         }
-        a = 1 - .95 * Math.pow(h / (history.length - 1), .1);
-        context.strokeStyle = "rgba(140,140,140," + a + ")";
+        a = 1 - .98 * Math.pow(h / (history.length - 1), .05);
+        context.strokeStyle = "rgba(0,0,0," + a + ")";
         context.stroke();
       }
       context.beginPath();
@@ -258,7 +259,7 @@
         context.beginPath();
         p = posToScreen(node);
         context.arc(p.x, p.y, nodeRadius, 0, TAU);
-        context.fillStyle = node === dragNode ? "#F80" : node === hoverNode ? "#FD7" : "#AAA";
+        context.fillStyle = node === dragNode ? "#FB0" : node === hoverNode ? "#F70" : "#444";
         results.push(context.fill());
       }
       return results;

@@ -8,7 +8,8 @@ window.addEventListener "DOMContentLoaded", ()->
   range = height * .7
   inset = (height-range)/2
   TAU = Math.PI*2
-  nodeRadius = 15
+  nodeRadius = 4
+  nodePad = 10
   nodes = null
   dragNode = null
   mouse = null
@@ -44,7 +45,7 @@ window.addEventListener "DOMContentLoaded", ()->
 
   getNodeAtScreenPoint = (p)->
     for node, i in nodes
-      return node if dist(posToScreen(node), p) <= nodeRadius
+      return node if dist(posToScreen(node), p) <= nodeRadius + nodePad
     return null
 
   dist = (a, b)->
@@ -133,11 +134,11 @@ window.addEventListener "DOMContentLoaded", ()->
       ms = mouseToScreen mouse
       history = evalCurveHistory mp.x
 
-      # Grey approx dot
+      # Red approx dot
       x = ms.x
       y = posToScreen(x:0, y: approx mp.x).y
       context.beginPath()
-      context.fillStyle = "#888"
+      context.fillStyle = "#F00"
       context.arc x, y, 5, 0, TAU
       context.fill()
 
@@ -154,8 +155,8 @@ window.addEventListener "DOMContentLoaded", ()->
           context.moveTo p.x, p.y
         else
           context.lineTo p.x, p.y
-      a = 1 - .95 * Math.pow h/(history.length-1), .1
-      context.strokeStyle = "rgba(140,140,140,#{a})"
+      a = 1 - .98 * Math.pow h/(history.length-1), .05
+      context.strokeStyle = "rgba(0,0,0,#{a})"
       context.stroke()
     
     # Red curve
@@ -181,7 +182,7 @@ window.addEventListener "DOMContentLoaded", ()->
       context.beginPath()
       p = posToScreen node
       context.arc p.x, p.y, nodeRadius, 0, TAU
-      context.fillStyle = if node is dragNode then "#F80" else if node is hoverNode then "#FD7" else "#AAA"
+      context.fillStyle = if node is dragNode then "#FB0" else if node is hoverNode then "#F70" else "#444"
       context.fill()
 
   canvas.addEventListener "mousedown", (e)->
