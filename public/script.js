@@ -21,11 +21,10 @@
         x: 0,
         y: 0
       });
-      nodes.push({
+      return nodes.push({
         x: 1,
         y: 1
       });
-      return render();
     };
     save = function() {
       return localStorage.setItem("wtcurve", JSON.stringify(nodes));
@@ -179,7 +178,7 @@
       return "[" + Math.round(n.x * 100) / 100 + "," + Math.round(n.y * 100) / 100 + "]";
     };
     render = function() {
-      var g, h, history, hoverNode, i, inc, j, k, l, len, len1, len2, mp, ms, node, p, point, points, results, t, x, y;
+      var a, h, history, hoverNode, i, inc, j, k, l, len, len1, len2, mp, ms, node, p, point, points, results, t, x, y;
       if (pointsDirty) {
         pointsDirty = false;
         save();
@@ -196,38 +195,39 @@
         mp = mouseToPos(mouse);
         ms = mouseToScreen(mouse);
         history = evalCurveHistory(mp.x);
-        for (h = j = 0, len = history.length; j < len; h = ++j) {
-          points = history[h];
-          context.beginPath();
-          g = 220 - 140 * h / history.length;
-          context.strokeStyle = "rgb(" + g + "," + g + "," + g + ")";
-          for (i = k = 0, len1 = points.length; k < len1; i = ++k) {
-            point = points[i];
-            p = posToScreen({
-              x: point.x,
-              y: point.y
-            });
-            if (points.length === 1) {
-              context.arc(p.x, p.y, 5, 0, TAU);
-              context.strokeStyle = "#555";
-              context.stroke();
-            } else if (i === 0) {
-              context.moveTo(p.x, p.y);
-            } else {
-              context.lineTo(p.x, p.y);
-            }
-          }
-          context.stroke();
-        }
         x = ms.x;
         y = posToScreen({
           x: 0,
           y: approx(mp.x)
         }).y;
         context.beginPath();
-        context.fillStyle = "#080";
+        context.fillStyle = "#888";
         context.arc(x, y, 5, 0, TAU);
         context.fill();
+      } else {
+        history = evalCurveHistory(0);
+      }
+      for (h = j = 0, len = history.length; j < len; h = ++j) {
+        points = history[h];
+        context.beginPath();
+        for (i = k = 0, len1 = points.length; k < len1; i = ++k) {
+          point = points[i];
+          if (!(points.length > 1)) {
+            continue;
+          }
+          p = posToScreen({
+            x: point.x,
+            y: point.y
+          });
+          if (i === 0) {
+            context.moveTo(p.x, p.y);
+          } else {
+            context.lineTo(p.x, p.y);
+          }
+        }
+        a = 1 - .95 * Math.pow(h / (history.length - 1), .1);
+        context.strokeStyle = "rgba(140,140,140," + a + ")";
+        context.stroke();
       }
       context.beginPath();
       context.strokeStyle = "#F00";
@@ -323,7 +323,8 @@
     field.addEventListener("blur", function() {
       return readField(focusing = false);
     });
-    return (nodes = JSON.parse(localStorage.getItem("wtcurve"))) || init();
+    (nodes = JSON.parse(localStorage.getItem("wtcurve"))) || init();
+    return render();
   });
 
 }).call(this);

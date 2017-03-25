@@ -19,7 +19,6 @@ window.addEventListener "DOMContentLoaded", ()->
     nodes = []
     nodes.push x:0, y:0
     nodes.push x:1, y:1
-    render()
   
   save = ()->
     localStorage.setItem "wtcurve", JSON.stringify nodes
@@ -133,31 +132,31 @@ window.addEventListener "DOMContentLoaded", ()->
       mp = mouseToPos mouse
       ms = mouseToScreen mouse
       history = evalCurveHistory mp.x
-      
-      # Grey histories & pos dot
-      for points, h in history
-        context.beginPath()
-        g = 220 - 140 * h/history.length
-        context.strokeStyle = "rgb(#{g},#{g},#{g})"
-        for point, i in points
-          p = posToScreen x:point.x, y: point.y
-          if points.length is 1
-            context.arc p.x, p.y, 5, 0, TAU
-            context.strokeStyle = "#555"
-            context.stroke()
-          else if i is 0
-            context.moveTo p.x, p.y
-          else
-            context.lineTo p.x, p.y
-        context.stroke()
 
-      # Green approx dot
+      # Grey approx dot
       x = ms.x
       y = posToScreen(x:0, y: approx mp.x).y
       context.beginPath()
-      context.fillStyle = "#080"
+      context.fillStyle = "#888"
       context.arc x, y, 5, 0, TAU
       context.fill()
+
+    else
+      history = evalCurveHistory 0
+
+
+    # Grey histories & pos dot
+    for points, h in history
+      context.beginPath()
+      for point, i in points when points.length > 1
+        p = posToScreen x:point.x, y: point.y
+        if i is 0
+          context.moveTo p.x, p.y
+        else
+          context.lineTo p.x, p.y
+      a = 1 - .95 * Math.pow h/(history.length-1), .1
+      context.strokeStyle = "rgba(140,140,140,#{a})"
+      context.stroke()
     
     # Red curve
     context.beginPath()
@@ -226,3 +225,4 @@ window.addEventListener "DOMContentLoaded", ()->
   field.addEventListener "blur", ()-> readField focusing = false
   
   (nodes = JSON.parse localStorage.getItem "wtcurve") or init()
+  render()
