@@ -1,12 +1,11 @@
 (function() {
   window.addEventListener("DOMContentLoaded", function() {
-    var TAU, approx, bounds, canvas, context, dist, dragNode, evalCurve, evalCurveHistory, field, focusing, getNodeAtScreenPoint, getNodeIndex, height, init, inset, mouse, mouseToPos, mouseToScreen, nodeRadius, nodes, pointsDirty, posToScreen, range, readField, render, renderNode, save, screenToPos, width;
+    var TAU, approx, canvas, context, dist, dragNode, evalCurve, evalCurveHistory, field, focusing, getNodeAtScreenPoint, getNodeIndex, height, init, inset, mouse, mouseToPos, mouseToScreen, nodeRadius, nodes, pointsDirty, posToScreen, range, readField, render, renderNode, save, screenToPos, width;
     field = document.querySelector("[field]");
     canvas = document.querySelector("canvas");
     context = canvas.getContext("2d");
     width = canvas.width = parseInt(canvas.offsetWidth);
     height = canvas.height = width;
-    bounds = canvas.getBoundingClientRect();
     range = height * .7;
     inset = (height - range) / 2;
     TAU = Math.PI * 2;
@@ -48,9 +47,11 @@
       };
     };
     mouseToScreen = function(e) {
+      var bounds;
+      bounds = canvas.getBoundingClientRect();
       return {
         x: e.clientX - bounds.left,
-        y: e.clientY - bounds.top + (document.body.scrollTop + document.body.parentElement.scrollTop)
+        y: e.clientY - bounds.top
       };
     };
     mouseToPos = function(e) {

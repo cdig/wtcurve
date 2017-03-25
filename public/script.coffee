@@ -1,14 +1,10 @@
 window.addEventListener "DOMContentLoaded", ()->
   
-  document.body.scrollLeft = document.body.parentElement.scrollLeft = 0
-  document.body.scrollTop = document.body.parentElement.scrollTop = 0
-  
   field = document.querySelector "[field]"
   canvas = document.querySelector "canvas"
   context = canvas.getContext "2d"
   width = canvas.width = parseInt canvas.offsetWidth
   height = canvas.height = width
-  bounds = canvas.getBoundingClientRect()
   range = height * .7
   inset = (height-range)/2
   TAU = Math.PI*2
@@ -37,8 +33,9 @@ window.addEventListener "DOMContentLoaded", ()->
     y: Math.min 1.2, Math.max -0.2, (height - inset - y) / range
 
   mouseToScreen = (e)->
-    x: e.clientX - bounds.left + (document.body.scrollLeft + document.body.parentElement.scrollLeft)
-    y: e.clientY - bounds.top + (document.body.scrollTop + document.body.parentElement.scrollTop)
+    bounds = canvas.getBoundingClientRect()
+    x: e.clientX - bounds.left
+    y: e.clientY - bounds.top
 
   mouseToPos = (e)->
     screenToPos mouseToScreen e
