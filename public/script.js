@@ -50,7 +50,7 @@
     mouseToScreen = function(e) {
       return {
         x: e.clientX - bounds.left,
-        y: e.clientY - bounds.top
+        y: e.clientY - bounds.top + (document.body.scrollTop + document.body.parentElement.scrollTop)
       };
     };
     mouseToPos = function(e) {

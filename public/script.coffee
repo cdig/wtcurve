@@ -35,7 +35,7 @@ window.addEventListener "DOMContentLoaded", ()->
 
   mouseToScreen = (e)->
     x: e.clientX - bounds.left
-    y: e.clientY - bounds.top
+    y: e.clientY - bounds.top + (document.body.scrollTop + document.body.parentElement.scrollTop)
 
   mouseToPos = (e)->
     screenToPos mouseToScreen e
