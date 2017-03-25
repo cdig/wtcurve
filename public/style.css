@@ -30,6 +30,13 @@ body {
   text-align: left;
 }
 
+.unselectable {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
 canvas {
   display: inline-block;
   width: 40em;
