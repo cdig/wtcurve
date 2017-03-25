@@ -43,6 +43,7 @@ canvas {
   margin-right: 2em;
   background: #F7F7F7;
   box-shadow: 0 8px 32px #BBB;
+  cursor: pointer;
 }
 
 [field] {
