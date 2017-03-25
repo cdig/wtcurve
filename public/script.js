@@ -296,6 +296,7 @@
     });
     canvas.addEventListener("dblclick", function(e) {
       var i, j, len, n, node, p;
+      e.preventDefault();
       if (node = getNodeAtScreenPoint(mouseToScreen(e))) {
         i = getNodeIndex(node);
         if (i !== 0 && i !== nodes.length - 1) {

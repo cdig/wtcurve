@@ -208,6 +208,7 @@ window.addEventListener "DOMContentLoaded", ()->
     render()
 
   canvas.addEventListener "dblclick", (e)->
+    e.preventDefault()
     if node = getNodeAtScreenPoint mouseToScreen e
       i = getNodeIndex node
       nodes.splice i, 1 if i isnt 0 and i isnt nodes.length-1
