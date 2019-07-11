@@ -30,17 +30,19 @@
     save = function() {
       return localStorage.setItem("wtcurve", JSON.stringify(nodes));
     };
-    posToScreen = function(arg) {
-      var x, y;
-      x = arg.x, y = arg.y;
+    posToScreen = function({
+        x: x,
+        y: y
+      }) {
       return {
         x: width * x,
         y: height - inset - y * range
       };
     };
-    screenToPos = function(arg) {
-      var x, y;
-      x = arg.x, y = arg.y;
+    screenToPos = function({
+        x: x,
+        y: y
+      }) {
       return {
         x: Math.min(1, Math.max(0, x / width)),
         y: Math.min(1.2, Math.max(-0.2, (height - inset - y) / range))
@@ -136,7 +138,7 @@
       while (attempts < 20) {
         mid = (a + b) / 2;
         v = evalCurve(mid);
-        if (Math.abs(v.x - goal) < 0.0001) {
+        if (Math.abs(v.x - goal) < 0.0001) { // Tends to finish in around 10 attempts
           return v.y;
         } else if (v.x > goal) {
           b = mid;
@@ -188,6 +190,8 @@
         }
       }
       context.clearRect(0, 0, width, height);
+      
+      // Draw BG
       context.beginPath();
       context.fillStyle = "#FFF";
       context.rect(0, inset, width, range);
@@ -196,6 +200,7 @@
         mp = mouseToPos(mouse);
         ms = mouseToScreen(mouse);
         history = evalCurveHistory(mp.x);
+        // Red approx dot
         x = ms.x;
         y = posToScreen({
           x: 0,
@@ -208,6 +213,7 @@
       } else {
         history = evalCurveHistory(0);
       }
+// Grey histories & pos dot
       for (h = j = 0, len = history.length; j < len; h = ++j) {
         points = history[h];
         context.beginPath();
@@ -227,9 +233,11 @@
           }
         }
         a = 1 - .98 * Math.pow(h / (history.length - 1), .05);
-        context.strokeStyle = "rgba(0,0,0," + a + ")";
+        context.strokeStyle = `rgba(0,0,0,${a})`;
         context.stroke();
       }
+      
+      // Red curve
       context.beginPath();
       context.strokeStyle = "#F00";
       context.lineWidth = 3;
@@ -251,6 +259,8 @@
       context.stroke();
       context.lineWidth = 1;
       if (mouse != null) {
+        
+        // Nodes
         hoverNode = getNodeAtScreenPoint(mouseToScreen(mouse));
       }
       results = [];
