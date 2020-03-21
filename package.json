@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "devDependencies": {
     "browser-sync": "latest",
-    "coffee-script": "latest",
+    "coffeescript": "latest",
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-coffee": "latest"
   },
