@@ -2,7 +2,7 @@
   "name": "wtcurve",
   "version": "0.0.0",
   "devDependencies": {
-    "browser-sync": "latest",
+    "browser-sync": "^2.26.10",
     "coffeescript": "latest",
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-coffee": "latest"
